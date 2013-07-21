@@ -98,6 +98,28 @@ func (w *WSuite) TestConnectionNetIn(c *C) {
 	c.Assert(resp.GetContainerPort(), Equals, uint32(7331))
 }
 
+func (w *WSuite) TestConnectionCopyIn(c *C) {
+	conn := &fakeConn{
+		ReadBuffer:  messages(&CopyInResponse{}),
+		WriteBuffer: bytes.NewBuffer([]byte{}),
+	}
+
+	connection := connectionWith(conn)
+
+	_, err := connection.CopyIn("foo-handle", "/foo", "/bar")
+	c.Assert(err, IsNil)
+
+	c.Assert(
+		string(conn.WriteBuffer.Bytes()),
+		Equals,
+		string(messages(&CopyInRequest{
+			Handle:  proto.String("foo-handle"),
+			SrcPath: proto.String("/foo"),
+			DstPath: proto.String("/bar"),
+		}).Bytes()),
+	)
+}
+
 func (w *WSuite) TestConnectionRun(c *C) {
 	conn := &fakeConn{
 		ReadBuffer:  messages(&RunResponse{ExitStatus: proto.Uint32(137)}),

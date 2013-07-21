@@ -45,6 +45,10 @@ func (c *Client) NetIn(handle string) (*NetInResponse, error) {
 	return (<-c.connection).NetIn(handle)
 }
 
+func (c *Client) CopyIn(handle, src, dst string) (*CopyInResponse, error) {
+	return c.acquireConnection().CopyIn(handle, src, dst)
+}
+
 func (c *Client) Stream(handle string, jobId uint32) (chan *StreamResponse, error) {
 	return c.acquireConnection().Stream(handle, jobId)
 }

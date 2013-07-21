@@ -177,6 +177,59 @@ func (w *WSuite) TestClientRunningAndDestroying(c *C) {
 	)
 }
 
+func (w *WSuite) TestClientCopyingInAndDestroying(c *C) {
+	firstWriteBuf := bytes.NewBuffer([]byte{})
+	secondWriteBuf := bytes.NewBuffer([]byte{})
+
+	mcp := &ManyConnectionProvider{
+		ReadBuffers: []*bytes.Buffer{
+			messages(&DestroyResponse{}),
+			messages(&CopyInResponse{}),
+		},
+		WriteBuffers: []*bytes.Buffer{
+			firstWriteBuf,
+			secondWriteBuf,
+		},
+	}
+
+	client := NewClient(mcp)
+
+	err := client.Connect()
+	c.Assert(err, IsNil)
+
+	_, err = client.CopyIn("foo", "/foo", "/bar")
+	c.Assert(err, IsNil)
+
+	_, err = client.Destroy("foo")
+	c.Assert(err, IsNil)
+
+	c.Assert(
+		string(firstWriteBuf.Bytes()),
+		Equals,
+		string(
+			messages(
+				&DestroyRequest{
+					Handle: proto.String("foo"),
+				},
+			).Bytes(),
+		),
+	)
+
+	c.Assert(
+		string(secondWriteBuf.Bytes()),
+		Equals,
+		string(
+			messages(
+				&CopyInRequest{
+					Handle:  proto.String("foo"),
+					SrcPath: proto.String("/foo"),
+					DstPath: proto.String("/bar"),
+				},
+			).Bytes(),
+		),
+	)
+}
+
 func (w *WSuite) TestClientReconnects(c *C) {
 	firstWriteBuf := bytes.NewBuffer([]byte{})
 	secondWriteBuf := bytes.NewBuffer([]byte{})

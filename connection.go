@@ -151,6 +151,23 @@ func (c *Connection) NetIn(handle string) (*NetInResponse, error) {
 	return res.(*NetInResponse), nil
 }
 
+func (c *Connection) CopyIn(handle, src, dst string) (*CopyInResponse, error) {
+	res, err := c.roundTrip(
+		&CopyInRequest{
+			Handle:  proto.String(handle),
+			SrcPath: proto.String(src),
+			DstPath: proto.String(dst),
+		},
+		&CopyInResponse{},
+	)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return res.(*CopyInResponse), nil
+}
+
 func (c *Connection) roundTrip(request proto.Message, response proto.Message) (proto.Message, error) {
 	err := c.sendMessage(request)
 	if err != nil {
