@@ -41,6 +41,10 @@ func (c *Client) Spawn(handle, script string) (*SpawnResponse, error) {
 	return (<-c.connection).Spawn(handle, script)
 }
 
+func (c *Client) NetIn(handle string) (*NetInResponse, error) {
+	return (<-c.connection).NetIn(handle)
+}
+
 func (c *Client) Stream(handle string, jobId uint32) (chan *StreamResponse, error) {
 	return c.acquireConnection().Stream(handle, jobId)
 }

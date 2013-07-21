@@ -138,6 +138,19 @@ func (c *Connection) Stream(handle string, jobId uint32) (chan *StreamResponse, 
 	return responses, nil
 }
 
+func (c *Connection) NetIn(handle string) (*NetInResponse, error) {
+	res, err := c.roundTrip(
+		&NetInRequest{Handle: proto.String(handle)},
+		&NetInResponse{},
+	)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return res.(*NetInResponse), nil
+}
+
 func (c *Connection) roundTrip(request proto.Message, response proto.Message) (proto.Message, error) {
 	err := c.sendMessage(request)
 	if err != nil {

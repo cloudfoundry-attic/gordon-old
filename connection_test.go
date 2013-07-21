@@ -70,6 +70,34 @@ func (w *WSuite) TestConnectionSpawn(c *C) {
 	c.Assert(resp.GetJobId(), Equals, uint32(42))
 }
 
+func (w *WSuite) TestConnectionNetIn(c *C) {
+	conn := &fakeConn{
+		ReadBuffer: messages(
+			&NetInResponse{
+				HostPort:      proto.Uint32(7331),
+				ContainerPort: proto.Uint32(7331),
+			},
+		),
+		WriteBuffer: bytes.NewBuffer([]byte{}),
+	}
+
+	connection := connectionWith(conn)
+
+	resp, err := connection.NetIn("foo-handle")
+	c.Assert(err, IsNil)
+
+	c.Assert(
+		string(conn.WriteBuffer.Bytes()),
+		Equals,
+		string(messages(&NetInRequest{
+			Handle: proto.String("foo-handle"),
+		}).Bytes()),
+	)
+
+	c.Assert(resp.GetHostPort(), Equals, uint32(7331))
+	c.Assert(resp.GetContainerPort(), Equals, uint32(7331))
+}
+
 func (w *WSuite) TestConnectionRun(c *C) {
 	conn := &fakeConn{
 		ReadBuffer:  messages(&RunResponse{ExitStatus: proto.Uint32(137)}),
