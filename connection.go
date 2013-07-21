@@ -37,6 +37,10 @@ func Connect(socket_path string) (*Connection, error) {
 	return &Connection{
 		conn: conn,
 		read: bufio.NewReader(conn),
+
+    // buffer size of 1 so that read and write errors
+		// can both send without blocking
+    disconnected: make(chan bool, 1),
 	}, nil
 }
 
@@ -188,7 +192,6 @@ func (c *Connection) sendMessage(req proto.Message) error {
 func (c *Connection) readResponse(response proto.Message) (proto.Message, error) {
 	payload, err := c.readPayload()
 	if err != nil {
-		fmt.Println("error reading payload: ", err)
 		c.disconnected <- true
 		return nil, err
 	}
@@ -196,11 +199,10 @@ func (c *Connection) readResponse(response proto.Message) (proto.Message, error)
 	message := &Message{}
 	err = proto.Unmarshal(payload, message)
 	if err != nil {
-		println("failed to unmarshal message :(")
 		return nil, err
 	}
 
-	// error response
+	// error response from server
 	if message.GetType() == Message_Type(1) {
 		errorResponse := &ErrorResponse{}
 		err = proto.Unmarshal(message.Payload, errorResponse)
@@ -215,9 +217,15 @@ func (c *Connection) readResponse(response proto.Message) (proto.Message, error)
 		}
 	}
 
-	if message.GetType() != Message_Type(message2type(response)) {
-		fmt.Printf("expected %d, got %d\n", message2type(response), *message.Type)
-		return nil, errors.New("response message type mismatch!")
+  response_type := Message_Type(message2type(response))
+	if message.GetType() != response_type {
+		return nil, errors.New(
+      fmt.Sprintf(
+        "expected message type %s, got %s\n",
+        response_type.String(),
+        message.GetType().String(),
+      )
+		)
 	}
 
 	err = proto.Unmarshal(message.GetPayload(), response)
@@ -296,7 +304,6 @@ func message2type(msg proto.Message) int32 {
 		return 93
 	}
 
-	fmt.Printf("wat?!?! %#v\n", msg)
 	panic("unknown message type")
 }
 

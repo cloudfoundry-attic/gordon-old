@@ -7,18 +7,19 @@ import (
 type Client struct {
 	SocketPath string
 
+  connectionProvider ConnectionProvider
 	connection chan *Connection
 }
 
-func NewClient(socketPath string) *Client {
+func NewClient(cp ConnectionProvider) *Client {
 	return &Client{
-		SocketPath: socketPath,
+    connectionProvider: cp,
 		connection: make(chan *Connection),
 	}
 }
 
 func (c *Client) Connect() error {
-	conn, err := Connect(c.SocketPath)
+	conn, err := c.connectionProvider.ProvideConnection()
 	if err != nil {
 		return err
 	}
@@ -64,7 +65,7 @@ func (c *Client) serveConnections(conn *Connection) {
 
 func (c *Client) acquireConnection() *Connection {
 	for {
-		conn, err := Connect(c.SocketPath)
+		conn, err := c.connectionProvider.ProvideConnection()
 		if err == nil {
 			return conn
 		}
