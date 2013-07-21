@@ -25,9 +25,9 @@ func connectionWith(conn net.Conn) *Connection {
 		conn: conn,
 		read: bufio.NewReader(conn),
 
-    // buffer size of 1 so that read and write errors
+		// buffer size of 1 so that read and write errors
 		// can both send without blocking
-    disconnected: make(chan bool, 1),
+		disconnected: make(chan bool, 1),
 	}
 }
 

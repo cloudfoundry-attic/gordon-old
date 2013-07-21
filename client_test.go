@@ -22,12 +22,12 @@ func (w *WSuite) TestClientConnectWithSuccessfulProvider(c *C) {
 }
 
 func (w *WSuite) TestClientContainerLifecycle(c *C) {
-  fcp := &FakeConnectionProvider{
+	fcp := &FakeConnectionProvider{
 		ReadBuffer: messages(
-		  &CreateResponse{Handle: proto.String("foo")},
-		  &DestroyResponse{},
+			&CreateResponse{Handle: proto.String("foo")},
+			&DestroyResponse{},
 		),
-    WriteBuffer: bytes.NewBuffer([]byte{}),
+		WriteBuffer: bytes.NewBuffer([]byte{}),
 	}
 
 	client := NewClient(fcp)
@@ -45,37 +45,37 @@ func (w *WSuite) TestClientContainerLifecycle(c *C) {
 	c.Assert(
 		string(fcp.WriteBuffer.Bytes()),
 		Equals,
-    string(
-      messages(
-        &CreateRequest{},
-        &DestroyRequest{Handle: proto.String("foo")},
-      ).Bytes(),
-    ),
+		string(
+			messages(
+				&CreateRequest{},
+				&DestroyRequest{Handle: proto.String("foo")},
+			).Bytes(),
+		),
 	)
 }
 
 func (w *WSuite) TestClientSpawnAndStreaming(c *C) {
-  firstWriteBuf := bytes.NewBuffer([]byte{})
-  secondWriteBuf := bytes.NewBuffer([]byte{})
+	firstWriteBuf := bytes.NewBuffer([]byte{})
+	secondWriteBuf := bytes.NewBuffer([]byte{})
 
-  mcp := &ManyConnectionProvider{
-    ReadBuffers: []*bytes.Buffer{
-      messages(
-        &SpawnResponse{
-          JobId: proto.Uint32(42),
-        },
-      ),
-      messages(
-        &StreamResponse{
-          Name: proto.String("stdout"),
-          Data: proto.String("some data for stdout"),
-        },
-      ),
-    },
-    WriteBuffers: []*bytes.Buffer{
-      firstWriteBuf,
-      secondWriteBuf,
-    },
+	mcp := &ManyConnectionProvider{
+		ReadBuffers: []*bytes.Buffer{
+			messages(
+				&SpawnResponse{
+					JobId: proto.Uint32(42),
+				},
+			),
+			messages(
+				&StreamResponse{
+					Name: proto.String("stdout"),
+					Data: proto.String("some data for stdout"),
+				},
+			),
+		},
+		WriteBuffers: []*bytes.Buffer{
+			firstWriteBuf,
+			secondWriteBuf,
+		},
 	}
 
 	client := NewClient(mcp)
@@ -83,59 +83,59 @@ func (w *WSuite) TestClientSpawnAndStreaming(c *C) {
 	err := client.Connect()
 	c.Assert(err, IsNil)
 
-  spawned, err := client.Spawn("foo", "echo some data for stdout")
-  c.Assert(err, IsNil)
+	spawned, err := client.Spawn("foo", "echo some data for stdout")
+	c.Assert(err, IsNil)
 
-  responses, err := client.Stream("foo", spawned.GetJobId())
+	responses, err := client.Stream("foo", spawned.GetJobId())
 	c.Assert(err, IsNil)
 
 	c.Assert(
-	  string(firstWriteBuf.Bytes()),
-	  Equals,
-    string(
-      messages(
-        &SpawnRequest{
-          Handle: proto.String("foo"),
-          Script: proto.String("echo some data for stdout"),
-        },
-      ).Bytes(),
-    ),
+		string(firstWriteBuf.Bytes()),
+		Equals,
+		string(
+			messages(
+				&SpawnRequest{
+					Handle: proto.String("foo"),
+					Script: proto.String("echo some data for stdout"),
+				},
+			).Bytes(),
+		),
 	)
 
 	c.Assert(
 		string(secondWriteBuf.Bytes()),
 		Equals,
-    string(
-      messages(
-        &StreamRequest{Handle: proto.String("foo"), JobId: proto.Uint32(42)},
-      ).Bytes(),
-    ),
+		string(
+			messages(
+				&StreamRequest{Handle: proto.String("foo"), JobId: proto.Uint32(42)},
+			).Bytes(),
+		),
 	)
 
-  res := <-responses
-  c.Assert(res.GetName(), Equals, "stdout")
-  c.Assert(res.GetData(), Equals, "some data for stdout")
+	res := <-responses
+	c.Assert(res.GetName(), Equals, "stdout")
+	c.Assert(res.GetData(), Equals, "some data for stdout")
 }
 
 func (w *WSuite) TestClientRunningAndDestroying(c *C) {
-  firstWriteBuf := bytes.NewBuffer([]byte{})
-  secondWriteBuf := bytes.NewBuffer([]byte{})
+	firstWriteBuf := bytes.NewBuffer([]byte{})
+	secondWriteBuf := bytes.NewBuffer([]byte{})
 
-  mcp := &ManyConnectionProvider{
-    ReadBuffers: []*bytes.Buffer{
-      messages(
-        &DestroyResponse{},
-      ),
-      messages(
-        &RunResponse{
-          ExitStatus: proto.Uint32(255),
-        },
-      ),
-    },
-    WriteBuffers: []*bytes.Buffer{
-      firstWriteBuf,
-      secondWriteBuf,
-    },
+	mcp := &ManyConnectionProvider{
+		ReadBuffers: []*bytes.Buffer{
+			messages(
+				&DestroyResponse{},
+			),
+			messages(
+				&RunResponse{
+					ExitStatus: proto.Uint32(255),
+				},
+			),
+		},
+		WriteBuffers: []*bytes.Buffer{
+			firstWriteBuf,
+			secondWriteBuf,
+		},
 	}
 
 	client := NewClient(mcp)
@@ -143,59 +143,59 @@ func (w *WSuite) TestClientRunningAndDestroying(c *C) {
 	err := client.Connect()
 	c.Assert(err, IsNil)
 
-  ran, err := client.Run("foo", "echo hi")
-  c.Assert(err, IsNil)
-
-  _, err = client.Destroy("foo")
+	ran, err := client.Run("foo", "echo hi")
 	c.Assert(err, IsNil)
 
-  c.Assert(ran.GetExitStatus(), Equals, uint32(255))
+	_, err = client.Destroy("foo")
+	c.Assert(err, IsNil)
+
+	c.Assert(ran.GetExitStatus(), Equals, uint32(255))
 
 	c.Assert(
-	  string(firstWriteBuf.Bytes()),
-	  Equals,
-    string(
-      messages(
-        &DestroyRequest{
-          Handle: proto.String("foo"),
-        },
-      ).Bytes(),
-    ),
+		string(firstWriteBuf.Bytes()),
+		Equals,
+		string(
+			messages(
+				&DestroyRequest{
+					Handle: proto.String("foo"),
+				},
+			).Bytes(),
+		),
 	)
 
 	c.Assert(
 		string(secondWriteBuf.Bytes()),
 		Equals,
-    string(
-      messages(
-        &RunRequest{
-          Handle: proto.String("foo"),
-          Script: proto.String("echo hi"),
-        },
-      ).Bytes(),
-    ),
+		string(
+			messages(
+				&RunRequest{
+					Handle: proto.String("foo"),
+					Script: proto.String("echo hi"),
+				},
+			).Bytes(),
+		),
 	)
 }
 
 func (w *WSuite) TestClientReconnects(c *C) {
-  firstWriteBuf := bytes.NewBuffer([]byte{})
-  secondWriteBuf := bytes.NewBuffer([]byte{})
+	firstWriteBuf := bytes.NewBuffer([]byte{})
+	secondWriteBuf := bytes.NewBuffer([]byte{})
 
-  mcp := &ManyConnectionProvider{
-    ReadBuffers: []*bytes.Buffer{
-      messages(
-        &CreateResponse{Handle: proto.String("handle a")},
-        // no response for Create #2
-      ),
-      messages(
-        &DestroyResponse{},
-        &DestroyResponse{},
-      ),
-    },
-    WriteBuffers: []*bytes.Buffer{
-      firstWriteBuf,
-      secondWriteBuf,
-    },
+	mcp := &ManyConnectionProvider{
+		ReadBuffers: []*bytes.Buffer{
+			messages(
+				&CreateResponse{Handle: proto.String("handle a")},
+				// no response for Create #2
+			),
+			messages(
+				&DestroyResponse{},
+				&DestroyResponse{},
+			),
+		},
+		WriteBuffers: []*bytes.Buffer{
+			firstWriteBuf,
+			secondWriteBuf,
+		},
 	}
 
 	client := NewClient(mcp)
@@ -203,35 +203,35 @@ func (w *WSuite) TestClientReconnects(c *C) {
 	err := client.Connect()
 	c.Assert(err, IsNil)
 
-  c1, err := client.Create()
-  c.Assert(err, IsNil)
+	c1, err := client.Create()
+	c.Assert(err, IsNil)
 
-  _, err = client.Create()
-  c.Assert(err, NotNil)
-  c.Assert(err.Error(), Equals, "EOF")
+	_, err = client.Create()
+	c.Assert(err, NotNil)
+	c.Assert(err.Error(), Equals, "EOF")
 
-  // let the client notice its connection was dropped
-  runtime.Gosched()
+	// let the client notice its connection was dropped
+	runtime.Gosched()
 
-  _, err = client.Destroy(c1.GetHandle())
-  c.Assert(err, IsNil)
+	_, err = client.Destroy(c1.GetHandle())
+	c.Assert(err, IsNil)
 
 	c.Assert(
-	  string(firstWriteBuf.Bytes()),
-	  Equals,
-    string(messages(&CreateRequest{}, &CreateRequest{}).Bytes()),
+		string(firstWriteBuf.Bytes()),
+		Equals,
+		string(messages(&CreateRequest{}, &CreateRequest{}).Bytes()),
 	)
 
 	c.Assert(
 		string(secondWriteBuf.Bytes()),
 		Equals,
-    string(
-      messages(
-        &DestroyRequest{
-          Handle: proto.String("handle a"),
-        },
-      ).Bytes(),
-    ),
+		string(
+			messages(
+				&DestroyRequest{
+					Handle: proto.String("handle a"),
+				},
+			).Bytes(),
+		),
 	)
 }
 
@@ -256,7 +256,7 @@ func (c *FakeConnectionProvider) ProvideConnection() (*Connection, error) {
 }
 
 type ManyConnectionProvider struct {
-	ReadBuffers []*bytes.Buffer
+	ReadBuffers  []*bytes.Buffer
 	WriteBuffers []*bytes.Buffer
 }
 

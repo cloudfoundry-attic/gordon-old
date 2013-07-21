@@ -38,9 +38,9 @@ func Connect(socket_path string) (*Connection, error) {
 		conn: conn,
 		read: bufio.NewReader(conn),
 
-    // buffer size of 1 so that read and write errors
+		// buffer size of 1 so that read and write errors
 		// can both send without blocking
-    disconnected: make(chan bool, 1),
+		disconnected: make(chan bool, 1),
 	}, nil
 }
 
@@ -217,14 +217,14 @@ func (c *Connection) readResponse(response proto.Message) (proto.Message, error)
 		}
 	}
 
-  response_type := Message_Type(message2type(response))
+	response_type := Message_Type(message2type(response))
 	if message.GetType() != response_type {
 		return nil, errors.New(
-      fmt.Sprintf(
-        "expected message type %s, got %s\n",
-        response_type.String(),
-        message.GetType().String(),
-      )
+			fmt.Sprintf(
+				"expected message type %s, got %s\n",
+				response_type.String(),
+				message.GetType().String(),
+			),
 		)
 	}
 

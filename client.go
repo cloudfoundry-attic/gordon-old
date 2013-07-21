@@ -7,14 +7,14 @@ import (
 type Client struct {
 	SocketPath string
 
-  connectionProvider ConnectionProvider
-	connection chan *Connection
+	connectionProvider ConnectionProvider
+	connection         chan *Connection
 }
 
 func NewClient(cp ConnectionProvider) *Client {
 	return &Client{
-    connectionProvider: cp,
-		connection: make(chan *Connection),
+		connectionProvider: cp,
+		connection:         make(chan *Connection),
 	}
 }
 
