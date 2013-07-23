@@ -20,17 +20,6 @@ func init() {
 	Suite(&WSuite{})
 }
 
-func connectionWith(conn net.Conn) *Connection {
-	return &Connection{
-		conn: conn,
-		read: bufio.NewReader(conn),
-
-		// buffer size of 1 so that read and write errors
-		// can both send without blocking
-		disconnected: make(chan bool, 1),
-	}
-}
-
 func messages(msgs ...proto.Message) *bytes.Buffer {
 	buf := bytes.NewBuffer([]byte{})
 

@@ -300,7 +300,7 @@ type FakeConnectionProvider struct {
 }
 
 func (c *FakeConnectionProvider) ProvideConnection() (*Connection, error) {
-	return connectionWith(
+	return NewConnection(
 		&fakeConn{
 			ReadBuffer:  c.ReadBuffer,
 			WriteBuffer: c.WriteBuffer,
@@ -324,7 +324,7 @@ func (c *ManyConnectionProvider) ProvideConnection() (*Connection, error) {
 	wbuf := c.WriteBuffers[0]
 	c.WriteBuffers = c.WriteBuffers[1:]
 
-	return connectionWith(
+	return NewConnection(
 		&fakeConn{
 			ReadBuffer:  rbuf,
 			WriteBuffer: wbuf,

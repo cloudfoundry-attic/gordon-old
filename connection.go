@@ -34,6 +34,10 @@ func Connect(socket_path string) (*Connection, error) {
 		return nil, err
 	}
 
+	return NewConnection(conn), nil
+}
+
+func NewConnection(conn net.Conn) *Connection {
 	return &Connection{
 		conn: conn,
 		read: bufio.NewReader(conn),
@@ -41,7 +45,7 @@ func Connect(socket_path string) (*Connection, error) {
 		// buffer size of 1 so that read and write errors
 		// can both send without blocking
 		disconnected: make(chan bool, 1),
-	}, nil
+	}
 }
 
 func (c *Connection) Close() {

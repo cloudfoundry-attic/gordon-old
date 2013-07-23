@@ -15,7 +15,7 @@ func (w *WSuite) TestConnectionCreating(c *C) {
 		WriteBuffer: bytes.NewBuffer([]byte{}),
 	}
 
-	connection := connectionWith(conn)
+	connection := NewConnection(conn)
 
 	resp, err := connection.Create()
 	c.Assert(err, IsNil)
@@ -35,7 +35,7 @@ func (w *WSuite) TestConnectionDestroying(c *C) {
 		WriteBuffer: bytes.NewBuffer([]byte{}),
 	}
 
-	connection := connectionWith(conn)
+	connection := NewConnection(conn)
 
 	_, err := connection.Destroy("foo")
 	c.Assert(err, IsNil)
@@ -53,7 +53,7 @@ func (w *WSuite) TestConnectionSpawn(c *C) {
 		WriteBuffer: bytes.NewBuffer([]byte{}),
 	}
 
-	connection := connectionWith(conn)
+	connection := NewConnection(conn)
 
 	resp, err := connection.Spawn("foo-handle", "echo hi")
 	c.Assert(err, IsNil)
@@ -81,7 +81,7 @@ func (w *WSuite) TestConnectionNetIn(c *C) {
 		WriteBuffer: bytes.NewBuffer([]byte{}),
 	}
 
-	connection := connectionWith(conn)
+	connection := NewConnection(conn)
 
 	resp, err := connection.NetIn("foo-handle")
 	c.Assert(err, IsNil)
@@ -104,7 +104,7 @@ func (w *WSuite) TestConnectionCopyIn(c *C) {
 		WriteBuffer: bytes.NewBuffer([]byte{}),
 	}
 
-	connection := connectionWith(conn)
+	connection := NewConnection(conn)
 
 	_, err := connection.CopyIn("foo-handle", "/foo", "/bar")
 	c.Assert(err, IsNil)
@@ -126,7 +126,7 @@ func (w *WSuite) TestConnectionRun(c *C) {
 		WriteBuffer: bytes.NewBuffer([]byte{}),
 	}
 
-	connection := connectionWith(conn)
+	connection := NewConnection(conn)
 
 	resp, err := connection.Run("foo-handle", "echo hi")
 	c.Assert(err, IsNil)
@@ -153,7 +153,7 @@ func (w *WSuite) TestConnectionStream(c *C) {
 		WriteBuffer: bytes.NewBuffer([]byte{}),
 	}
 
-	connection := connectionWith(conn)
+	connection := NewConnection(conn)
 
 	resp, err := connection.Stream("foo-handle", 42)
 	c.Assert(err, IsNil)
@@ -186,7 +186,7 @@ func (w *WSuite) TestConnectionError(c *C) {
 		WriteBuffer: bytes.NewBuffer([]byte{}),
 	}
 
-	connection := connectionWith(conn)
+	connection := NewConnection(conn)
 
 	resp, err := connection.Run("foo-handle", "echo hi")
 	c.Assert(resp, IsNil)
