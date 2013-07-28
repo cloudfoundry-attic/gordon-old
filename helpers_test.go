@@ -1,7 +1,6 @@
 package warden
 
 import (
-	"bufio"
 	"bytes"
 	"code.google.com/p/goprotobuf/proto"
 	"errors"
