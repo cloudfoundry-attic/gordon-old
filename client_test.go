@@ -194,7 +194,7 @@ func (w *WSuite) TestClientContainerList(c *C) {
 
 	res, err := client.List()
 	c.Assert(err, IsNil)
-	c.Assert(res.Handles, DeepEquals, []string{"container1", "container6"})
+	c.Assert(res.GetHandles(), DeepEquals, []string{"container1", "container6"})
 
 	c.Assert(
 		string(fcp.WriteBuffer.Bytes()),

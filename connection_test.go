@@ -119,7 +119,8 @@ func (w *WSuite) TestConnectionList(c *C) {
 		string(messages(&ListRequest{}).Bytes()),
 	)
 
-	c.Assert(resp.Handles, DeepEquals, []string{"container1", "container2", "container3"})
+	c.Assert(resp.GetHandles(), DeepEquals, []string{"container1", "container2", "container3"})
+}
 }
 
 func (w *WSuite) TestConnectionCopyIn(c *C) {
