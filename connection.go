@@ -322,7 +322,7 @@ func message2type(msg proto.Message) int32 {
 	case *DestroyRequest, *DestroyResponse:
 		return 13
 	case *InfoRequest, *InfoResponse:
-		return 13
+		return 14
 
 	case *SpawnRequest, *SpawnResponse:
 		return 21
