@@ -121,6 +121,31 @@ func (w *WSuite) TestConnectionList(c *C) {
 
 	c.Assert(resp.GetHandles(), DeepEquals, []string{"container1", "container2", "container3"})
 }
+
+func (w *WSuite) TestConnectionInfo(c *C) {
+	conn := &fakeConn{
+		ReadBuffer: messages(
+			&InfoResponse{
+				State: proto.String("active"),
+			},
+		),
+		WriteBuffer: bytes.NewBuffer([]byte{}),
+	}
+
+	connection := NewConnection(conn)
+
+	resp, err := connection.Info("handle")
+	c.Assert(err, IsNil)
+
+	c.Assert(
+		string(conn.WriteBuffer.Bytes()),
+		Equals,
+		string(messages(&InfoRequest{
+			Handle: proto.String("handle"),
+		}).Bytes()),
+	)
+
+	c.Assert(resp.GetState(), Equals, "active")
 }
 
 func (w *WSuite) TestConnectionCopyIn(c *C) {

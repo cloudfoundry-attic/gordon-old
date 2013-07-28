@@ -49,6 +49,10 @@ func (c *Client) List() (*ListResponse, error) {
 	return (<-c.connection).List()
 }
 
+func (c *Client) Info(handle string) (*InfoResponse, error) {
+	return (<-c.connection).Info(handle)
+}
+
 func (c *Client) CopyIn(handle, src, dst string) (*CopyInResponse, error) {
 	return c.acquireConnection().CopyIn(handle, src, dst)
 }
