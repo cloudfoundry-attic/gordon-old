@@ -177,6 +177,38 @@ func (w *WSuite) TestClientRunningAndDestroying(c *C) {
 	)
 }
 
+func (w *WSuite) TestClientContainerInfo(c *C) {
+	fcp := &FakeConnectionProvider{
+		ReadBuffer: messages(
+			&InfoResponse{
+				State: proto.String("stopped"),
+			},
+		),
+		WriteBuffer: bytes.NewBuffer([]byte{}),
+	}
+
+	client := NewClient(fcp)
+
+	err := client.Connect()
+	c.Assert(err, IsNil)
+
+	res, err := client.Info("handle")
+	c.Assert(err, IsNil)
+	c.Assert(res.GetState(), Equals, "stopped")
+
+	c.Assert(
+		string(fcp.WriteBuffer.Bytes()),
+		Equals,
+		string(
+			messages(
+				&InfoRequest{
+				    Handle: proto.String("handle"),
+				},
+			).Bytes(),
+		),
+	)
+}
+
 func (w *WSuite) TestClientContainerList(c *C) {
 	fcp := &FakeConnectionProvider{
 		ReadBuffer: messages(
@@ -194,7 +226,7 @@ func (w *WSuite) TestClientContainerList(c *C) {
 
 	res, err := client.List()
 	c.Assert(err, IsNil)
-	c.Assert(res.Handles, DeepEquals, []string{"container1", "container6"})
+	c.Assert(res.GetHandles(), DeepEquals, []string{"container1", "container6"})
 
 	c.Assert(
 		string(fcp.WriteBuffer.Bytes()),

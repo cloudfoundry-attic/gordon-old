@@ -181,6 +181,17 @@ func (c *Connection) List() (*ListResponse, error) {
 	return res.(*ListResponse), nil
 }
 
+func (c *Connection) Info(handle string) (*InfoResponse, error) {
+	res, err := c.roundTrip(&InfoRequest{
+		Handle: proto.String(handle),
+	}, &InfoResponse{})
+	if err != nil {
+		return nil, err
+	}
+
+	return res.(*InfoResponse), nil
+}
+
 func (c *Connection) roundTrip(request proto.Message, response proto.Message) (proto.Message, error) {
 	err := c.sendMessage(request)
 	if err != nil {
