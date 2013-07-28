@@ -177,6 +177,36 @@ func (w *WSuite) TestClientRunningAndDestroying(c *C) {
 	)
 }
 
+func (w *WSuite) TestClientContainerList(c *C) {
+	fcp := &FakeConnectionProvider{
+		ReadBuffer: messages(
+			&ListResponse{
+				Handles: []string{"container1", "container6"},
+			},
+		),
+		WriteBuffer: bytes.NewBuffer([]byte{}),
+	}
+
+	client := NewClient(fcp)
+
+	err := client.Connect()
+	c.Assert(err, IsNil)
+
+	res, err := client.List()
+	c.Assert(err, IsNil)
+	c.Assert(res.Handles, DeepEquals, []string{"container1", "container6"})
+
+	c.Assert(
+		string(fcp.WriteBuffer.Bytes()),
+		Equals,
+		string(
+			messages(
+				&ListRequest{},
+			).Bytes(),
+		),
+	)
+}
+
 func (w *WSuite) TestClientCopyingInAndDestroying(c *C) {
 	firstWriteBuf := bytes.NewBuffer([]byte{})
 	secondWriteBuf := bytes.NewBuffer([]byte{})

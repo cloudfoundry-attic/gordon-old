@@ -45,6 +45,10 @@ func (c *Client) NetIn(handle string) (*NetInResponse, error) {
 	return (<-c.connection).NetIn(handle)
 }
 
+func (c *Client) List() (*ListResponse, error) {
+	return (<-c.connection).List()
+}
+
 func (c *Client) CopyIn(handle, src, dst string) (*CopyInResponse, error) {
 	return c.acquireConnection().CopyIn(handle, src, dst)
 }

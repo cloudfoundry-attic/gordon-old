@@ -98,6 +98,30 @@ func (w *WSuite) TestConnectionNetIn(c *C) {
 	c.Assert(resp.GetContainerPort(), Equals, uint32(7331))
 }
 
+func (w *WSuite) TestConnectionList(c *C) {
+	conn := &fakeConn{
+		ReadBuffer: messages(
+			&ListResponse{
+				Handles: []string{"container1", "container2", "container3"},
+			},
+		),
+		WriteBuffer: bytes.NewBuffer([]byte{}),
+	}
+
+	connection := NewConnection(conn)
+
+	resp, err := connection.List()
+	c.Assert(err, IsNil)
+
+	c.Assert(
+		string(conn.WriteBuffer.Bytes()),
+		Equals,
+		string(messages(&ListRequest{}).Bytes()),
+	)
+
+	c.Assert(resp.Handles, DeepEquals, []string{"container1", "container2", "container3"})
+}
+
 func (w *WSuite) TestConnectionCopyIn(c *C) {
 	conn := &fakeConn{
 		ReadBuffer:  messages(&CopyInResponse{}),
