@@ -172,6 +172,15 @@ func (c *Connection) CopyIn(handle, src, dst string) (*CopyInResponse, error) {
 	return res.(*CopyInResponse), nil
 }
 
+func (c *Connection) List() (*ListResponse, error) {
+	res, err := c.roundTrip(&ListRequest{}, &ListResponse{})
+	if err != nil {
+		return nil, err
+	}
+
+	return res.(*ListResponse), nil
+}
+
 func (c *Connection) roundTrip(request proto.Message, response proto.Message) (proto.Message, error) {
 	err := c.sendMessage(request)
 	if err != nil {
