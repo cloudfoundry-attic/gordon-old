@@ -85,7 +85,7 @@ func (w *WSuite) TestDiskLimiting(c *C) {
 	res, err := connection.LimitDisk("foo", 42)
 	c.Assert(err, IsNil)
 
-	c.Assert(res.GetLimitInBytes(), Equals, uint64(40))
+	c.Assert(res.GetByteLimit(), Equals, uint64(40))
 
 	c.Assert(
 		string(conn.WriteBuffer.Bytes()),
