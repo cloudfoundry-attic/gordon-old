@@ -155,6 +155,38 @@ func (c *Connection) NetIn(handle string) (*NetInResponse, error) {
 	return res.(*NetInResponse), nil
 }
 
+func (c *Connection) LimitMemory(handle string, limit uint64) (*LimitMemoryResponse, error) {
+	res, err := c.roundTrip(
+		&LimitMemoryRequest{
+			Handle:       proto.String(handle),
+			LimitInBytes: proto.Uint64(limit),
+		},
+		&LimitMemoryResponse{},
+	)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return res.(*LimitMemoryResponse), nil
+}
+
+func (c *Connection) LimitDisk(handle string, limit uint64) (*LimitDiskResponse, error) {
+	res, err := c.roundTrip(
+		&LimitDiskRequest{
+			Handle:    proto.String(handle),
+			ByteLimit: proto.Uint64(limit),
+		},
+		&LimitDiskResponse{},
+	)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return res.(*LimitDiskResponse), nil
+}
+
 func (c *Connection) CopyIn(handle, src, dst string) (*CopyInResponse, error) {
 	res, err := c.roundTrip(
 		&CopyInRequest{
