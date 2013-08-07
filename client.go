@@ -49,8 +49,16 @@ func (c *Client) LimitMemory(handle string, limit uint64) (*LimitMemoryResponse,
 	return (<-c.connection).LimitMemory(handle, limit)
 }
 
+func (c *Client) GetMemoryLimit(handle string) (uint64, error) {
+	return (<-c.connection).GetMemoryLimit(handle)
+}
+
 func (c *Client) LimitDisk(handle string, limit uint64) (*LimitDiskResponse, error) {
 	return (<-c.connection).LimitDisk(handle, limit)
+}
+
+func (c *Client) GetDiskLimit(handle string) (uint64, error) {
+	return (<-c.connection).GetDiskLimit(handle)
 }
 
 func (c *Client) List() (*ListResponse, error) {

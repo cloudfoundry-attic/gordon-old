@@ -5,6 +5,7 @@ import (
 	"code.google.com/p/goprotobuf/proto"
 	"errors"
 	"fmt"
+	"math"
 	"net"
 	"strconv"
 	"sync"
@@ -171,6 +172,26 @@ func (c *Connection) LimitMemory(handle string, limit uint64) (*LimitMemoryRespo
 	return res.(*LimitMemoryResponse), nil
 }
 
+func (c *Connection) GetMemoryLimit(handle string) (uint64, error) {
+	res, err := c.roundTrip(
+		&LimitMemoryRequest{
+			Handle: proto.String(handle),
+		},
+		&LimitMemoryResponse{},
+	)
+
+	if err != nil {
+		return 0, err
+	}
+
+	limit := res.(*LimitMemoryResponse).GetLimitInBytes()
+	if limit == math.MaxInt64 { // PROBABLY NOT A LIMIT
+		return 0, nil
+	}
+
+	return limit, nil
+}
+
 func (c *Connection) LimitDisk(handle string, limit uint64) (*LimitDiskResponse, error) {
 	res, err := c.roundTrip(
 		&LimitDiskRequest{
@@ -185,6 +206,21 @@ func (c *Connection) LimitDisk(handle string, limit uint64) (*LimitDiskResponse,
 	}
 
 	return res.(*LimitDiskResponse), nil
+}
+
+func (c *Connection) GetDiskLimit(handle string) (uint64, error) {
+	res, err := c.roundTrip(
+		&LimitDiskRequest{
+			Handle: proto.String(handle),
+		},
+		&LimitDiskResponse{},
+	)
+
+	if err != nil {
+		return 0, err
+	}
+
+	return res.(*LimitDiskResponse).GetByteLimit(), nil
 }
 
 func (c *Connection) CopyIn(handle, src, dst string) (*CopyInResponse, error) {

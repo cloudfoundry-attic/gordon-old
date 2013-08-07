@@ -202,7 +202,7 @@ func (w *WSuite) TestClientContainerInfo(c *C) {
 		string(
 			messages(
 				&InfoRequest{
-				    Handle: proto.String("handle"),
+					Handle: proto.String("handle"),
 				},
 			).Bytes(),
 		),

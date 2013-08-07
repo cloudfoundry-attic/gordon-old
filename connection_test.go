@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"code.google.com/p/goprotobuf/proto"
 	. "launchpad.net/gocheck"
+	"math"
 )
 
 func (w *WSuite) TestConnectionCreating(c *C) {
@@ -74,6 +75,56 @@ func (w *WSuite) TestMemoryLimiting(c *C) {
 	)
 }
 
+func (w *WSuite) TestGettingMemoryLimit(c *C) {
+	conn := &fakeConn{
+		ReadBuffer:  messages(&LimitMemoryResponse{LimitInBytes: proto.Uint64(40)}),
+		WriteBuffer: bytes.NewBuffer([]byte{}),
+	}
+
+	connection := NewConnection(conn)
+
+	memoryLimit, err := connection.GetMemoryLimit("foo")
+	c.Assert(err, IsNil)
+	c.Assert(memoryLimit, Equals, uint64(40))
+
+	c.Assert(
+		string(conn.WriteBuffer.Bytes()),
+		Equals,
+		string(
+			messages(
+				&LimitMemoryRequest{
+					Handle: proto.String("foo"),
+				},
+			).Bytes(),
+		),
+	)
+}
+
+func (w *WSuite) TestGettingMemoryLimitThatLooksFishy(c *C) {
+	conn := &fakeConn{
+		ReadBuffer:  messages(&LimitMemoryResponse{LimitInBytes: proto.Uint64(math.MaxInt64)}),
+		WriteBuffer: bytes.NewBuffer([]byte{}),
+	}
+
+	connection := NewConnection(conn)
+
+	memoryLimit, err := connection.GetMemoryLimit("foo")
+	c.Assert(err, IsNil)
+	c.Assert(memoryLimit, Equals, uint64(0))
+
+	c.Assert(
+		string(conn.WriteBuffer.Bytes()),
+		Equals,
+		string(
+			messages(
+				&LimitMemoryRequest{
+					Handle: proto.String("foo"),
+				},
+			).Bytes(),
+		),
+	)
+}
+
 func (w *WSuite) TestDiskLimiting(c *C) {
 	conn := &fakeConn{
 		ReadBuffer:  messages(&LimitDiskResponse{ByteLimit: proto.Uint64(40)}),
@@ -95,6 +146,31 @@ func (w *WSuite) TestDiskLimiting(c *C) {
 				&LimitDiskRequest{
 					Handle:    proto.String("foo"),
 					ByteLimit: proto.Uint64(42),
+				},
+			).Bytes(),
+		),
+	)
+}
+
+func (w *WSuite) TestGettingDiskLimit(c *C) {
+	conn := &fakeConn{
+		ReadBuffer:  messages(&LimitDiskResponse{ByteLimit: proto.Uint64(40)}),
+		WriteBuffer: bytes.NewBuffer([]byte{}),
+	}
+
+	connection := NewConnection(conn)
+
+	diskLimit, err := connection.GetDiskLimit("foo")
+	c.Assert(err, IsNil)
+	c.Assert(diskLimit, Equals, uint64(40))
+
+	c.Assert(
+		string(conn.WriteBuffer.Bytes()),
+		Equals,
+		string(
+			messages(
+				&LimitDiskRequest{
+					Handle: proto.String("foo"),
 				},
 			).Bytes(),
 		),
