@@ -14,6 +14,7 @@ type Client struct {
 type ConnectedWardenClient interface {
 	CreateByRequest(*CreateRequest) (*CreateResponse, error)
 	LimitDisk(string, uint64) (*LimitDiskResponse, error)
+	LimitMemory(string, uint64) (*LimitMemoryResponse, error)
 }
 
 func NewClient(cp ConnectionProvider) *Client {
