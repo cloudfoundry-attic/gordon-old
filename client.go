@@ -11,6 +11,11 @@ type Client struct {
 	connection         chan *Connection
 }
 
+type ConnectedWardenClient interface {
+	CreateByRequest(*CreateRequest) (*CreateResponse, error)
+	LimitDisk(string, uint64) (*LimitDiskResponse, error)
+}
+
 func NewClient(cp ConnectionProvider) *Client {
 	return &Client{
 		connectionProvider: cp,
@@ -30,6 +35,10 @@ func (c *Client) Connect() error {
 }
 
 func (c *Client) Create() (*CreateResponse, error) {
+	return (<-c.connection).Create()
+}
+
+func (c *Client) CreateByRequest(*CreateRequest) (*CreateResponse, error) {
 	return (<-c.connection).Create()
 }
 
